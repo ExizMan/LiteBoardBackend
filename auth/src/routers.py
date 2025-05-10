@@ -74,7 +74,7 @@ async def login(
 
     add_refresh_token_cookie(response=response, token=token_pair.refresh.token)
 
-    return {"accessToken": token_pair.access.token}
+    return {"accessToken": token_pair.access.token, "email": user.email}
 
 
 @router.get("/refresh")
