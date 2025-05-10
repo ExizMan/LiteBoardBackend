@@ -1,0 +1,64 @@
+x-postgres-environment-vars: &env-vars
+  POSTGRES_PASSWORD: postgres
+  POSTGRES_USER: postgres
+  POSTGRES_HOST: db
+  POSTGRES_NAME: postgres
+  POSTGRES_PORT: 5432
+
+
+services:
+  nginx:
+    image: nginx
+    container_name: nginx
+#    network_mode: host
+
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+#    command: [ nginx-debug, '-g', 'daemon off;' ]
+  db:
+    image: postgres:15
+    container_name: db
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      <<: *env-vars
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  auth:
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: docker_iternal/auth.Dockerfile
+    ports:
+      - 8001:8001
+    environment:
+      <<: *env-vars
+
+  migrations:
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: docker_iternal/migrations.Dockerfile
+    environment:
+      <<: *env-vars
+
+
+
+volumes:
+  postgres-data:
+    driver: local
+
+
+
+networks:
+  default:
+    driver: bridge
+
