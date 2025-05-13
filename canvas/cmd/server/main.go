@@ -10,9 +10,9 @@ func main() {
 	config.LoadConfig()
 
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
+	r.GET("/canvas/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong"})
 	})
-	r.GET("/ws/:boardId", handlers.HandleWebSocket)
+	r.GET("/canvas/ws/:boardId", handlers.HandleWebSocket)
 	r.Run(":" + config.Cfg.Port)
 }
