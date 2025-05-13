@@ -140,9 +140,10 @@ async def invite_user(
     data: schemas.InviteUser,
     db: AsyncSession = Depends(get_db),
 ):
+    invated_user = await User.find_by_email(db=db, email=data.user_id)
 
     stmt = insert(UserTeams).values(
-        user_id=data.user_id,
+        user_id=invated_user.user_id,
         team_id=team_id,
         status=InviteStatus.invited
     ).on_conflict_do_nothing()

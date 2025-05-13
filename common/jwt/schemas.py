@@ -1,5 +1,6 @@
 
 from datetime import datetime
+from typing import Literal
 from pydantic import BaseModel, PositiveInt, field_validator, EmailStr, UUID4, Field
 
 
@@ -91,8 +92,7 @@ class BlackListToken(BaseModel):
     expire: datetime
 
 
-from pydantic import BaseModel
-from typing import Literal
+
 
 class TeamCreate(BaseModel):
     name: str
@@ -100,7 +100,7 @@ class TeamCreate(BaseModel):
     pool: int = 2
 
 class InviteUser(BaseModel):
-    user_id: str
+    email: str
 
 class UpdateInviteStatus(BaseModel):
     team_id: int
