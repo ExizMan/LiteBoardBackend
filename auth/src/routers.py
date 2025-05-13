@@ -3,6 +3,7 @@ from datetime import datetime
 from fastapi.requests import Request
 
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Response, Cookie
+from sqlalchemy import insert, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -19,7 +20,7 @@ from common.jwt.jwt import (
     EXP, oauth2_scheme,
 )
 from common.exceptions import BadRequestException, ForbiddenException
-from db.models.users import User, BlackListToken
+from db.models.users import User, BlackListToken, UserTeams, Teams, InviteStatus
 
 router = APIRouter(
     prefix="/auth", tags=["auth"]
@@ -112,5 +113,58 @@ async def me(
     expr = (User.user_uuid == token_data[SUB])
     return await User.find_by_expr(db=db, expr=expr)
 
+
+@router.post("/teams/create")
+async def create_team(
+    data: schemas.TeamCreate,
+    token: Annotated[str, Depends(oauth2_scheme)],
+    db: AsyncSession = Depends(get_db),
+):
+    token_data = await decode_access_token(token=token, db=db)
+    user_id = token_data[SUB]
+
+    team = Teams(name=data.name, description=data.description, pool=data.pool)
+    db.add(team)
+    await db.flush()
+
+    link = UserTeams(user_id=user_id, team_id=team.id, status=InviteStatus.accepted)
+    db.add(link)
+    await db.commit()
+    return {"team_id": team.id, "name": team.name}
+
+
+@router.post("/teams/{team_id}/invite")
+async def invite_user(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    team_id: int,
+    data: schemas.InviteUser,
+    db: AsyncSession = Depends(get_db),
+):
+
+    stmt = insert(UserTeams).values(
+        user_id=data.user_id,
+        team_id=team_id,
+        status=InviteStatus.invited
+    ).on_conflict_do_nothing()
+    await db.execute(stmt)
+    await db.commit()
+    return {"msg": f"User {data.user_id} invited to team {team_id}"}
+
+
+@router.post("/teams/respond")
+async def respond_to_invite(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    data: schemas.UpdateInviteStatus,
+    db: AsyncSession = Depends(get_db),
+):
+    token_data = await decode_access_token(token=token, db=db)
+    user_id = token_data[SUB]
+    stmt = update(UserTeams).where(
+        UserTeams.user_id == user_id,
+        UserTeams.team_id == data.team_id
+    ).values(status=InviteStatus[data.status])
+    await db.execute(stmt)
+    await db.commit()
+    return {"msg": f"Your invite to team {data.team_id} was {data.status}"}
 
 

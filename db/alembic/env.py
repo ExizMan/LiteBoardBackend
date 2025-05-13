@@ -29,6 +29,9 @@ from db.models import *
 
 
 from db.models.users import *
+from db.models.boards import *
+from db.models.collab import *
+
 
 from db.database import Base
 

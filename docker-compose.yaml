@@ -35,11 +35,96 @@ services:
       - db
     build:
       context: .
-      dockerfile: docker_iternal/auth.Dockerfile
+      dockerfile: docker_iternal/dev.Dockerfile
+      args:
+        REQ_PATH: ./auth/requirements.txt
     ports:
       - 8001:8001
     environment:
       <<: *env-vars
+    command: ["uvicorn", "auth.run_web:app", "--host", "0.0.0.0", "--port", "8001"]
+
+    develop:
+      watch:
+        - action: rebuild
+          path: ./auth
+          target: /app/auth
+        - action: rebuild
+          path: ./common
+          target: /app/common
+        - action: rebuild
+          path: ./db
+          target: /app/db
+        - action: rebuild
+          path: ./auth/requirements.txt
+
+  boards:
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: docker_iternal/dev.Dockerfile
+      args:
+        REQ_PATH: ./boards/requirements.txt
+    ports:
+      - 8002:8002
+    environment:
+      <<: *env-vars
+    command: [ "uvicorn", "boards.run_web:app", "--host", "0.0.0.0", "--port", "8002" ]
+    develop:
+      watch:
+        - action: rebuild
+          path: ./boards
+          target: /app/boards
+        - action: rebuild
+          path: ./common
+          target: /app/common
+        - action: rebuild
+          path: ./db
+          target: /app/db
+        - action: rebuild
+          path: ./boards/requirements.txt
+
+  collab:
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: docker_iternal/dev.Dockerfile
+      args:
+        REQ_PATH: ./collab/requirements.txt
+    ports:
+      - 8003:8003
+    environment:
+      <<: *env-vars
+    command: [ "uvicorn", "collab.run_web:app", "--host", "0.0.0.0", "--port", "8003" ]
+
+    develop:
+      watch:
+        - action: rebuild
+          path: ./collab
+          target: /app/collab
+        - action: rebuild
+          path: ./common
+          target: /app/common
+        - action: rebuild
+          path: ./db
+          target: /app/db
+        - action: rebuild
+          path: ./collab/requirements.txt
+
+  canvas:
+    build:
+      context: .
+      dockerfile: docker_iternal/canvas.Dockerfile
+    ports:
+      - 8004:8004
+    develop:
+      watch:
+        - action: sync
+          path: ./canvas
+          target: /app
+
 
   migrations:
     depends_on:

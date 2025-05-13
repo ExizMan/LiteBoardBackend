@@ -90,3 +90,18 @@ class BlackListToken(BaseModel):
     id: UUID4
     expire: datetime
 
+
+from pydantic import BaseModel
+from typing import Literal
+
+class TeamCreate(BaseModel):
+    name: str
+    description: str | None = None
+    pool: int = 2
+
+class InviteUser(BaseModel):
+    user_id: str
+
+class UpdateInviteStatus(BaseModel):
+    team_id: int
+    status: Literal["accepted", "rejected"]

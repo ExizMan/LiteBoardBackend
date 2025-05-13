@@ -1,0 +1,2 @@
+port: "8004"
+jwt_secret: "secretkey"

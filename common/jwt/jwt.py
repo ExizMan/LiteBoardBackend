@@ -11,15 +11,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from common.jwt.schemas import User, TokenPair, JwtTokenSchema
 from common.exceptions import AuthFailedException
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-SECRET_KEY = os.getenv(
-    "SECRET_KEY",
-    "secretkey",
-)
-if not SECRET_KEY:
-    SECRET_KEY = os.urandom(32)
+# SECRET_KEY = os.getenv(
+#     "SECRET_KEY",
+#     "secretkey",
+# )
+# if not SECRET_KEY:
+#     SECRET_KEY = os.urandom(32)
 
+SECRET_KEY = "secretkey"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRES_MINUTES = 120
 REFRESH_TOKEN_EXPIRES_MINUTES = 15 * 24 * 60  # 15 days
