@@ -15,8 +15,7 @@ build:
 # Запуск всех миграций
 migrate:
 	docker compose up -d db
-	docker compose run --rm migrations alembic revision --autogenerate -m "auto migration"
-	docker compose run --rm migrations alembic upgrade head
+	docker compose up --build migrations
 	docker compose down
 
 

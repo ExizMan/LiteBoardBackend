@@ -1,4 +1,4 @@
-
+import uuid
 from datetime import datetime
 from typing import Literal
 from pydantic import BaseModel, PositiveInt, field_validator, EmailStr, UUID4, Field
@@ -92,7 +92,17 @@ class BlackListToken(BaseModel):
     expire: datetime
 
 
-
+class Team(BaseModel):
+    id: uuid.UUID
+    name: str
+    description: str | None = None
+    members: list[User] = [{  "id": 1,
+  "name": "string",
+  "email": "string",
+  "role": 'member',
+  "joinedAt": datetime.now()}]
+    pool: int = 2
+    created_at: datetime = Field(serialization_alias="createdAt", validation_alias="created_at", default=datetime.now())
 
 class TeamCreate(BaseModel):
     name: str

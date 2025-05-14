@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="e81c9c04-afe0-46f6-8cb3-0841e2bf3a60" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth/src/routers.py" beforeDir="false" afterPath="$PROJECT_DIR$/auth/src/routers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/jwt/schemas.py" beforeDir="false" afterPath="$PROJECT_DIR$/common/jwt/schemas.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/alembic/versions/502499c8b6d0_add_collab.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/alembic/versions/61b0cced15e3_add_boards.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/alembic/versions/96ba39b09df4_auto_migration.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/alembic/versions/9a1c89c00534_add_boards_and_fix.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/alembic/versions/ada89c8dfcb2_rename_table.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/alembic/versions/adcc3eb373a0_add_boards_and_fix2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/alembic/versions/c56e3f095162_init.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/alembic/versions/d72d23119678_set_fio_possible_to_null.py" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+        <option value="Dockerfile" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="2wuPIcaZYBfPcliApDaneEjy3Su" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Makefile Target.migrate.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/exizman/LiteBoardBack&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.editor&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/boards" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/common" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="migrate" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/Makefile" target="migrate" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Makefile Target.migrate" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-6a121458b545-JavaScript-PY-251.25410.122" />
+        <option value="bundled-python-sdk-880ecab49056-36ea0e71a18c-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.25410.122" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e81c9c04-afe0-46f6-8cb3-0841e2bf3a60" name="Changes" comment="" />
+      <created>1746888407406</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1746888407406</updated>
+      <workItem from="1746888409657" duration="4243000" />
+      <workItem from="1746897076140" duration="656000" />
+      <workItem from="1746898786311" duration="2313000" />
+      <workItem from="1746901569916" duration="2612000" />
+      <workItem from="1746981067627" duration="13229000" />
+      <workItem from="1747077748088" duration="3944000" />
+      <workItem from="1747086117465" duration="1331000" />
+      <workItem from="1747157366162" duration="5508000" />
+      <workItem from="1747165267603" duration="7850000" />
+      <workItem from="1747241197323" duration="4838000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

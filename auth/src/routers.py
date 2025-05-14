@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from typing import Annotated
 from datetime import datetime
 from fastapi.requests import Request
@@ -132,6 +133,36 @@ async def create_team(
     await db.commit()
     return {"team_id": team.id, "name": team.name}
 
+# id: 2,
+#   //       name: 'Разработчики',
+#   //       members: [
+#   //         {
+#   //           id: 2,
+#   //           name: 'Разработчик',
+#   //           email: 'dev@example.com',
+#   //           role: 'member',
+#   //           joinedAt: new Date()
+#   //         }
+#   //       ],
+#   //       createdAt: new Date()
+@router.get("/teams", response_model=list[schemas.Team])
+async def get_teams(
+        token: Annotated[str, Depends(oauth2_scheme)],
+        db: AsyncSession = Depends(get_db),
+):
+    token_data = await decode_access_token(token=token, db=db)
+    user_id = token_data[SUB]
+
+    query = (
+        select(Teams)
+        .select_from(Teams)
+        .join(UserTeams, UserTeams.team_id == Teams.id)
+        .where(UserTeams.user_id == user_id)
+    )
+    result = await db.execute(query)
+    print(result)
+    return result.scalars().all()
+
 
 @router.post("/teams/{team_id}/invite")
 async def invite_user(
@@ -146,7 +177,7 @@ async def invite_user(
         user_id=invated_user.user_id,
         team_id=team_id,
         status=InviteStatus.invited
-    ).on_conflict_do_nothing()
+    )
     await db.execute(stmt)
     await db.commit()
     return {"msg": f"User {data.user_id} invited to team {team_id}"}
