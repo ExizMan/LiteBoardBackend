@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, func
 from typing import Annotated
 from datetime import datetime
 from fastapi.requests import Request
@@ -145,7 +145,7 @@ async def create_team(
 #   //         }
 #   //       ],
 #   //       createdAt: new Date()
-@router.get("/teams", response_model=list[schemas.Team])
+@router.get("/teams", )
 async def get_teams(
         token: Annotated[str, Depends(oauth2_scheme)],
         db: AsyncSession = Depends(get_db),
@@ -154,14 +154,30 @@ async def get_teams(
     user_id = token_data[SUB]
 
     query = (
-        select(Teams)
+        select(
+            Teams.id,
+            Teams.name,
+            Teams.description,
+            Teams.pool,
+            Teams.created_at,
+            Teams.updated_at,
+            func.json_agg(
+                func.json_build_object(
+                    'id', User.user_uuid,
+                    'email', User.email
+                )
+            ).label('members')
+        )
         .select_from(Teams)
         .join(UserTeams, UserTeams.team_id == Teams.id)
+        .join(User, UserTeams.user_id == User.user_uuid)
         .where(UserTeams.user_id == user_id)
+        .group_by(Teams.id)
     )
+
     result = await db.execute(query)
-    print(result)
-    return result.scalars().all()
+    teams_with_members = result.mappings().all()
+    return teams_with_members
 
 
 @router.post("/teams/{team_id}/invite")
