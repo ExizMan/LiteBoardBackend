@@ -73,24 +73,31 @@ func listen(conn *websocket.Conn, boardID, userID string) {
 			break
 		}
 		var parsed models.Message
-		if err := json.Unmarshal(msg, &parsed); err == nil {
-			log.Printf("Received message: type=%s, userId=%s, boardId=%s", parsed.Type, userID, boardID)
-		}
+		// if err := json.Unmarshal(msg, &parsed); err == nil {
+			// log.Printf("Received message: type=%s, userId=%s, boardId=%s", parsed.Type, userID, boardID)
+		// }
 		broadcast(boardID, msg, userID)
 	}
 }
 
 func broadcast(boardId string, msg []byte, senderId string) {
-	log.Printf("Broadcasting message: boardId=%s, senderId=%s", boardId, senderId)
-	var parsed models.Message
-	if err := json.Unmarshal(msg, &parsed); err == nil {
-		saveToRedis(boardId, senderId, parsed, msg)
+	// log.Printf("Broadcasting message: boardId=%s, senderId=%s", boardId, senderId)
+
+	// Используем универсальный парсер для определения типа события
+	event, err := models.ParseCanvasEvent(msg)
+	if err == nil {
+		if event.GetType() == "draw" {
+			// Только draw сохраняем в Redis
+			var parsed models.Message
+			_ = json.Unmarshal(msg, &parsed) // для совместимости с сигнатурой saveToRedis
+			saveToRedis(boardId, senderId, parsed, msg)
+		}
 	}
 	mu.Lock()
 	session := boards[boardId]
 	session.Mutex.Lock()
 	defer session.Mutex.Unlock()
-	log.Printf("MSG: %s", msg)
+	// log.Printf("MSG: %s", msg)
 	defer mu.Unlock()
 	for _, client := range session.Clients {
 		if client.UserID != senderId {

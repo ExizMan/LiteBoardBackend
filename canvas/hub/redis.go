@@ -15,6 +15,12 @@ import (
 var (
 	rdb *redis.Client
 	ctx = context.Background()
+	// Разрешённые типы событий для сохранения в БД
+	allowedEventTypes = map[string]struct{}{
+		"draw": {},
+		// "shape": {},
+		// "image": {},
+	}
 )
 
 // Инициализация Redis
@@ -87,11 +93,17 @@ func syncBoardToDB(db *gorm.DB, boardID string) {
 		if !ok {
 			continue
 		}
-		// Сохраняем оригинальный JSON, который пришёл от клиента (msg)
+		action, ok := event.Values["action"].(string)
+		if !ok {
+			continue
+		}
+		if !isAllowedEventType(action) {
+			continue // сохраняем только разрешённые типы
+		}
 		dbEvents = append(dbEvents, models.CanvasEvent{
 			BoardID:   boardID,
 			UserID:    event.Values["user_id"].(string),
-			Action:    event.Values["action"].(string),
+			Action:    action,
 			Data:      dataStr,
 			CreatedAt: time.Now(),
 		})
@@ -108,6 +120,12 @@ func syncBoardToDB(db *gorm.DB, boardID string) {
 	if _, err := rdb.XDel(ctx, "canvas:"+boardID, lastID).Result(); err != nil {
 		log.Printf("[REDIS][ERROR] XDel: %v", err)
 	}
+}
+
+// Проверяет, нужно ли сохранять событие этого типа
+func isAllowedEventType(eventType string) bool {
+	_, ok := allowedEventTypes[eventType]
+	return ok
 }
 
 func GetBoardHistoryFromRedis(boardID string) ([]models.Message, error) {
