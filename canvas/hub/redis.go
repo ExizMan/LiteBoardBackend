@@ -1,0 +1,129 @@
+package hub
+
+import (
+	"context"
+	"encoding/json"
+	"log"
+	"strings"
+	"time"
+
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
+	"canvas/models"
+)
+
+var (
+	rdb *redis.Client
+	ctx = context.Background()
+)
+
+// Инициализация Redis
+func InitRedis(addr string) {
+	rdb = redis.NewClient(&redis.Options{
+		Addr: addr, // "localhost:6379"
+	})
+}
+
+// Сохраняет событие в Redis Stream
+func saveToRedis(boardID, userID string, msg models.Message, rawMsg []byte) {
+	log.Printf("[REDIS] XAdd: boardID=%s, userID=%s, action=%s, data=%s", boardID, userID, msg.Type, string(rawMsg))
+	event := map[string]interface{}{
+		"user_id": userID,
+		"action":  msg.Type, // "draw_line", "add_object" и т.д.
+		"data":    string(rawMsg),
+	}
+
+	_, err := rdb.XAdd(ctx, &redis.XAddArgs{
+		Stream: "canvas:" + boardID,
+		Values: event,
+	}).Result()
+
+	if err != nil {
+		log.Printf("[REDIS][ERROR] XAdd: %v", err)
+	}
+}
+
+// Запускает фоновую синхронизацию с БД
+func StartSyncWorker(db *gorm.DB, interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		syncAllBoards(db)
+	}
+}
+
+// Синхронизирует все доски из Redis в БД
+func syncAllBoards(db *gorm.DB) {
+	log.Printf("[REDIS] Keys: pattern=canvas:*")
+	streamKeys, err := rdb.Keys(ctx, "canvas:*").Result()
+	if err != nil {
+		log.Printf("[REDIS][ERROR] Keys: %v", err)
+		return
+	}
+
+	for _, streamKey := range streamKeys {
+		boardID := strings.TrimPrefix(streamKey, "canvas:")
+		syncBoardToDB(db, boardID)
+	}
+}
+
+// Переносит события одной доски из Redis в БД
+func syncBoardToDB(db *gorm.DB, boardID string) {
+	log.Printf("[REDIS] XRange: boardID=%s", boardID)
+	events, err := rdb.XRange(ctx, "canvas:"+boardID, "-", "+").Result()
+	if err != nil {
+		log.Printf("[REDIS][ERROR] XRange: %v", err)
+		return
+	}
+
+	if len(events) == 0 {
+		return
+	}
+
+	var dbEvents []models.CanvasEvent
+	for _, event := range events {
+		dataStr, ok := event.Values["data"].(string)
+		if !ok {
+			continue
+		}
+		// Сохраняем оригинальный JSON, который пришёл от клиента (msg)
+		dbEvents = append(dbEvents, models.CanvasEvent{
+			BoardID:   boardID,
+			UserID:    event.Values["user_id"].(string),
+			Action:    event.Values["action"].(string),
+			Data:      dataStr,
+			CreatedAt: time.Now(),
+		})
+	}
+
+	// Пакетная вставка в PostgreSQL
+	if err := db.Create(&dbEvents).Error; err != nil {
+		log.Printf("[POSTGRES][ERROR] Insert events: %v", err)
+		return
+	}
+	log.Printf("[POSTGRES] Insert events: boardID=%s, count=%d", boardID, len(dbEvents))
+	lastID := events[len(events)-1].ID
+	log.Printf("[REDIS] XDel: boardID=%s, lastID=%s", boardID, lastID)
+	if _, err := rdb.XDel(ctx, "canvas:"+boardID, lastID).Result(); err != nil {
+		log.Printf("[REDIS][ERROR] XDel: %v", err)
+	}
+}
+
+func GetBoardHistoryFromRedis(boardID string) ([]models.Message, error) {
+	log.Printf("[REDIS] XRange (history): boardID=%s", boardID)
+	var result []models.Message
+	events, err := rdb.XRange(ctx, "canvas:"+boardID, "-", "+").Result()
+	if err != nil {
+		return nil, err
+	}
+	for _, event := range events {
+		var msg models.Message
+		if dataStr, ok := event.Values["data"].(string); ok {
+			if err := json.Unmarshal([]byte(dataStr), &msg); err == nil {
+				result = append(result, msg)
+			}
+		}
+	}
+	return result, nil
+}
