@@ -6,8 +6,11 @@ import (
 )
 
 type Config struct {
-	Port      string `mapstructure:"port"`
-	JWTSecret string `mapstructure:"jwt_secret"`
+	Port         string `mapstructure:"port"`
+	JWTSecret    string `mapstructure:"jwt_secret"`
+	RedisAddr    string `mapstructure:"redis_addr"`
+	PostgresDSN  string `mapstructure:"postgres_dsn"`
+	SyncInterval string `mapstructure:"sync_interval"` // например, "1m" или "30s"
 }
 
 var Cfg *Config

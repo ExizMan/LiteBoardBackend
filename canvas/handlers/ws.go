@@ -2,10 +2,14 @@ package handlers
 
 import (
 	"canvas/hub"
+	"canvas/models"
 	"canvas/utils"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"gorm.io/gorm"
 	"net/http"
+	"log"
 )
 
 var upgrader = websocket.Upgrader{
@@ -28,6 +32,36 @@ func HandleWebSocket(c *gin.Context) {
 	if err != nil {
 		http.Error(c.Writer, "WebSocket upgrade failed", http.StatusBadRequest)
 		return
+	}
+
+	dbAny, exists := c.Get("db")
+	if !exists {
+		log.Println("DB not found in context")
+		conn.Close()
+		return
+	}
+	db := dbAny.(*gorm.DB)
+
+	// 1. История из БД
+	var events []models.CanvasEvent
+	err = db.Where("board_id = ?", boardId).Order("created_at asc").Find(&events).Error
+	if err != nil {
+		log.Printf("DB history error: %v", err)
+	}
+	for _, event := range events {
+		log.Printf("[POSTGRES] Sending event to client: %s", event.Data)
+		conn.WriteMessage(websocket.TextMessage, []byte(event.Data))
+	}
+
+	// 2. История из Redis
+	redisEvents, err := hub.GetBoardHistoryFromRedis(boardId)
+	if err != nil {
+		log.Printf("Redis history error: %v", err)
+	}
+	for _, msg := range redisEvents {
+		data, _ := json.Marshal(msg)
+		log.Printf("[REDIS] Sending event to client: %s", string(data))
+		conn.WriteMessage(websocket.TextMessage, data)
 	}
 
 	hub.RegisterClient(boardId, userId, conn)

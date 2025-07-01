@@ -4,6 +4,7 @@ import (
 	"canvas/models"
 	"encoding/json"
 	"github.com/gorilla/websocket"
+	"log"
 	"sync"
 )
 
@@ -14,7 +15,7 @@ type Client struct {
 
 type BoardSession struct {
 	Clients []*Client
-	History []models.Message
+	// History []models.Message
 	Mutex   sync.Mutex
 }
 
@@ -24,6 +25,7 @@ var (
 )
 
 func RegisterClient(boardId, userId string, conn *websocket.Conn) {
+	log.Printf("Registering client: userId=%s, boardId=%s", userId, boardId)
 	mu.Lock()
 	session, ok := boards[boardId]
 	if !ok {
@@ -39,37 +41,63 @@ func RegisterClient(boardId, userId string, conn *websocket.Conn) {
 	go listen(conn, boardId, userId)
 }
 
-func listen(conn *websocket.Conn, boardId, userId string) {
+// func listen(conn *websocket.Conn, boardId, userId string) {
+// 	for {
+// 		_, msg, err := conn.ReadMessage()
+// 		if err != nil {
+// 			break
+// 		}
+
+// 		var parsed models.Message
+// 		if err := json.Unmarshal(msg, &parsed); err == nil {
+// 			mu.Lock()
+// 			session := boards[boardId]
+// 			session.Mutex.Lock()
+// 			session.History = append(session.History, parsed)
+// 			session.Mutex.Unlock()
+// 			mu.Unlock()
+// 		}
+
+// 		broadcast(boardId, msg, userId)
+// 	}
+// }
+
+
+func listen(conn *websocket.Conn, boardID, userID string) {
+	defer conn.Close()
+	log.Printf("Listening websocket: userId=%s, boardId=%s", userID, boardID)
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
+			log.Printf("WebSocket read error: %v (userId=%s, boardId=%s)", err, userID, boardID)
 			break
 		}
-
 		var parsed models.Message
 		if err := json.Unmarshal(msg, &parsed); err == nil {
-			mu.Lock()
-			session := boards[boardId]
-			session.Mutex.Lock()
-			session.History = append(session.History, parsed)
-			session.Mutex.Unlock()
-			mu.Unlock()
+			log.Printf("Received message: type=%s, userId=%s, boardId=%s", parsed.Type, userID, boardID)
 		}
-
-		broadcast(boardId, msg, userId)
+		broadcast(boardID, msg, userID)
 	}
 }
 
 func broadcast(boardId string, msg []byte, senderId string) {
+	log.Printf("Broadcasting message: boardId=%s, senderId=%s", boardId, senderId)
+	var parsed models.Message
+	if err := json.Unmarshal(msg, &parsed); err == nil {
+		saveToRedis(boardId, senderId, parsed, msg)
+	}
 	mu.Lock()
 	session := boards[boardId]
 	session.Mutex.Lock()
 	defer session.Mutex.Unlock()
+	log.Printf("MSG: %s", msg)
 	defer mu.Unlock()
-
 	for _, client := range session.Clients {
 		if client.UserID != senderId {
-			client.Conn.WriteMessage(websocket.TextMessage, msg)
+			err := client.Conn.WriteMessage(websocket.TextMessage, msg)
+			if err != nil {
+				log.Printf("WebSocket send error: %v (to userId=%s, boardId=%s)", err, client.UserID, boardId)
+			}
 		}
 	}
 }

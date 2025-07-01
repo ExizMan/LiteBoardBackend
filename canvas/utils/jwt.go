@@ -11,7 +11,7 @@ import (
 var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
 func ValidateToken(tokenString string) (string, error) {
-	secret := []byte(config.Cfg.JWTSecret) // теперь берём при вызове
+	secret := []byte(config.Cfg.JWTSecret)
 	log.Printf("SECRET USED IN Go: %s", secret)
 	log.Printf("Validating token: %s", tokenString)
 
