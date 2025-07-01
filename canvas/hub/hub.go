@@ -72,7 +72,7 @@ func listen(conn *websocket.Conn, boardID, userID string) {
 			log.Printf("WebSocket read error: %v (userId=%s, boardId=%s)", err, userID, boardID)
 			break
 		}
-		var parsed models.Message
+		// var parsed models.Message
 		// if err := json.Unmarshal(msg, &parsed); err == nil {
 			// log.Printf("Received message: type=%s, userId=%s, boardId=%s", parsed.Type, userID, boardID)
 		// }
