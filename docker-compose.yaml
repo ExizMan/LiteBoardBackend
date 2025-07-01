@@ -19,6 +19,15 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
 #    command: [ nginx-debug, '-g', 'daemon off;' ]
+  pgadmin:
+    image: 'docker.io/dpage/pgadmin4:latest'
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "asd@asd.ru"
+      PGADMIN_DEFAULT_PASSWORD: "asdasdasd"
+    ports:
+      - 15080:80
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin/
   db:
     image: postgres:15
     container_name: db
@@ -148,6 +157,8 @@ volumes:
   postgres-data:
     driver: local
   redis_data:
+    driver: local
+  pgadmin-data:
     driver: local
 
 
