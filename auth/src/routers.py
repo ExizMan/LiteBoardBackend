@@ -4,7 +4,7 @@ from datetime import datetime
 from fastapi.requests import Request
 
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Response, Cookie
-from sqlalchemy import insert, update
+from sqlalchemy import insert, update, join
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -153,6 +153,18 @@ async def get_teams(
     token_data = await decode_access_token(token=token, db=db)
     user_id = token_data[SUB]
 
+    # query_join = join(
+    #     Teams, user_id, UserTeams.team_id == Teams.id
+    # ).join(
+    #     User, UserTeams.team_id == Teams.id
+    # )
+
+    subq = (
+        select(UserTeams.team_id)
+        .where(UserTeams.user_id == user_id)
+        .subquery()
+    )
+
     query = (
         select(
             Teams.id,
@@ -171,7 +183,7 @@ async def get_teams(
         .select_from(Teams)
         .join(UserTeams, UserTeams.team_id == Teams.id)
         .join(User, UserTeams.user_id == User.user_uuid)
-        .where(UserTeams.user_id == user_id)
+        .where(Teams.id.in_(subq))
         .group_by(Teams.id)
     )
 
@@ -182,21 +194,21 @@ async def get_teams(
 
 @router.post("/teams/{team_id}/invite")
 async def invite_user(
-    token: Annotated[str, Depends(oauth2_scheme)],
-    team_id: int,
+    # token: Annotated[str, Depends(oauth2_scheme)],
+    team_id: str,
     data: schemas.InviteUser,
     db: AsyncSession = Depends(get_db),
 ):
-    invated_user = await User.find_by_email(db=db, email=data.user_id)
+    invited_user = await User.find_by_email(db=db, email=data.email)
 
     stmt = insert(UserTeams).values(
-        user_id=invated_user.user_id,
+        user_id=invited_user.user_uuid,
         team_id=team_id,
         status=InviteStatus.invited
     )
     await db.execute(stmt)
     await db.commit()
-    return {"msg": f"User {data.user_id} invited to team {team_id}"}
+    return {"msg": f"User {data.email} invited to team {team_id}"}
 
 
 @router.post("/teams/respond")

@@ -22,8 +22,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 SECRET_KEY = "secretkey"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRES_MINUTES = 120
-REFRESH_TOKEN_EXPIRES_MINUTES = 15 * 24 * 60  # 15 days
+ACCESS_TOKEN_EXPIRES_MINUTES = 15 * 24 * 60
+REFRESH_TOKEN_EXPIRES_MINUTES = 15 * 24 * 60 * 2  # 30 days
 
 REFRESH_COOKIE_NAME = "refresh"
 SUB = "sub"

@@ -4,6 +4,8 @@ from fastapi import FastAPI
 import uvicorn
 
 from auth.src.routers import router as router_auth
+from fastapi.middleware.cors import CORSMiddleware
+
 
 from fastapi import Response
 
@@ -11,27 +13,34 @@ from fastapi import Response
 app = FastAPI()
 
 
-@app.middleware("http")
-async def add_cors_headers(request, call_next):
-    response = Response()
-
-    if request.method == "OPTIONS":
-        response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
-
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-        return response
-
-    response = await call_next(request)
-
-    response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
-
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-
-    return response
+# @app.middleware("http")
+# async def add_cors_headers(request, call_next):
+#     response = Response(status_code=200)
+#
+#     if request.method == "OPTIONS":
+#         response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
+#
+#         response.headers["Access-Control-Allow-Credentials"] = "true"
+#         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+#         response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+#         return response
+#
+#     response = await call_next(request)
+#
+#     response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
+#
+#     response.headers["Access-Control-Allow-Credentials"] = "true"
+#     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+#     response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+#
+#     return response
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 app.include_router(router_auth)
