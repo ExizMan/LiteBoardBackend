@@ -16,6 +16,13 @@ func main() {
 	config.LoadConfig()
 	log.Println("Starting server...")
 	hub.InitRedis(config.Cfg.RedisAddr)
+
+	// Если окружение dev — очищаем все canvas:* стримы в Redis
+	if config.Cfg.Env == "dev" {
+		log.Println("[DEV] Clearing all canvas streams in Redis...")
+		hub.ClearAllCanvasStreams()
+	}
+
 	db, err := gorm.Open(postgres.Open(config.Cfg.PostgresDSN), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)

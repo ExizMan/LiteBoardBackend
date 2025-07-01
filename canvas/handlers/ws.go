@@ -4,7 +4,6 @@ import (
 	"canvas/hub"
 	"canvas/models"
 	"canvas/utils"
-	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"gorm.io/gorm"
@@ -58,10 +57,9 @@ func HandleWebSocket(c *gin.Context) {
 	if err != nil {
 		log.Printf("Redis history error: %v", err)
 	}
-	for _, msg := range redisEvents {
-		data, _ := json.Marshal(msg)
-		log.Printf("[REDIS] Sending event to client: %s", string(data))
-		conn.WriteMessage(websocket.TextMessage, data)
+	for _, data := range redisEvents {
+		log.Printf("[REDIS] Sending event to client: %s", data)
+		conn.WriteMessage(websocket.TextMessage, []byte(data))
 	}
 
 	hub.RegisterClient(boardId, userId, conn)

@@ -19,6 +19,12 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
 #    command: [ nginx-debug, '-g', 'daemon off;' ]
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=redis
   pgadmin:
     image: 'docker.io/dpage/pgadmin4:latest'
     environment:
@@ -160,6 +166,7 @@ volumes:
     driver: local
   pgadmin-data:
     driver: local
+
 
 
 

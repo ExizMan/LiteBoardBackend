@@ -11,6 +11,7 @@ type Config struct {
 	RedisAddr    string `mapstructure:"redis_addr"`
 	PostgresDSN  string `mapstructure:"postgres_dsn"`
 	SyncInterval string `mapstructure:"sync_interval"` // например, "1m" или "30s"
+	Env          string `mapstructure:"env"`
 }
 
 var Cfg *Config

@@ -3,3 +3,6 @@ jwt_secret: "secretkey"
 redis_addr: "redis:6379"
 postgres_dsn: "postgres://postgres:postgres@db:5432"
 sync_interval: "1m"
+env: dev
+
+

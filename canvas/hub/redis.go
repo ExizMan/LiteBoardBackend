@@ -2,7 +2,6 @@ package hub
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"strings"
 	"time"
@@ -88,6 +87,7 @@ func syncBoardToDB(db *gorm.DB, boardID string) {
 	}
 
 	var dbEvents []models.CanvasEvent
+	var idsToDelete []string
 	for _, event := range events {
 		dataStr, ok := event.Values["data"].(string)
 		if !ok {
@@ -107,6 +107,7 @@ func syncBoardToDB(db *gorm.DB, boardID string) {
 			Data:      dataStr,
 			CreatedAt: time.Now(),
 		})
+		idsToDelete = append(idsToDelete, event.ID)
 	}
 
 	// Пакетная вставка в PostgreSQL
@@ -115,10 +116,21 @@ func syncBoardToDB(db *gorm.DB, boardID string) {
 		return
 	}
 	log.Printf("[POSTGRES] Insert events: boardID=%s, count=%d", boardID, len(dbEvents))
-	lastID := events[len(events)-1].ID
-	log.Printf("[REDIS] XDel: boardID=%s, lastID=%s", boardID, lastID)
-	if _, err := rdb.XDel(ctx, "canvas:"+boardID, lastID).Result(); err != nil {
-		log.Printf("[REDIS][ERROR] XDel: %v", err)
+
+	// Удаляем все обработанные записи из стрима
+	if len(idsToDelete) > 0 {
+		if _, err := rdb.XDel(ctx, "canvas:"+boardID, idsToDelete...).Result(); err != nil {
+			log.Printf("[REDIS][ERROR] XDel: %v", err)
+		} else {
+			log.Printf("[REDIS] XDel: boardID=%s, deleted=%d", boardID, len(idsToDelete))
+		}
+	}
+
+	// Если стрим пустой — удаляем ключ
+	streamLen, err := rdb.XLen(ctx, "canvas:"+boardID).Result()
+	if err == nil && streamLen == 0 {
+		_, _ = rdb.Del(ctx, "canvas:"+boardID).Result()
+		log.Printf("[REDIS] DEL: boardID=%s (stream is empty)", boardID)
 	}
 }
 
@@ -128,20 +140,35 @@ func isAllowedEventType(eventType string) bool {
 	return ok
 }
 
-func GetBoardHistoryFromRedis(boardID string) ([]models.Message, error) {
+func GetBoardHistoryFromRedis(boardID string) ([]string, error) {
 	log.Printf("[REDIS] XRange (history): boardID=%s", boardID)
-	var result []models.Message
+	var result []string
 	events, err := rdb.XRange(ctx, "canvas:"+boardID, "-", "+").Result()
 	if err != nil {
 		return nil, err
 	}
 	for _, event := range events {
-		var msg models.Message
 		if dataStr, ok := event.Values["data"].(string); ok {
-			if err := json.Unmarshal([]byte(dataStr), &msg); err == nil {
-				result = append(result, msg)
-			}
+			result = append(result, dataStr)
 		}
 	}
 	return result, nil
+}
+
+// Удаляет все canvas:* стримы из Redis (для dev-окружения)
+func ClearAllCanvasStreams() {
+	keys, err := rdb.Keys(ctx, "canvas:*").Result()
+	if err != nil {
+		log.Printf("[REDIS][ERROR] ClearAllCanvasStreams: %v", err)
+		return
+	}
+	if len(keys) == 0 {
+		log.Println("[REDIS] No canvas streams to delete.")
+		return
+	}
+	if _, err := rdb.Del(ctx, keys...).Result(); err != nil {
+		log.Printf("[REDIS][ERROR] Del in ClearAllCanvasStreams: %v", err)
+	} else {
+		log.Printf("[REDIS] Cleared %d canvas streams.", len(keys))
+	}
 }
