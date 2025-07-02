@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 from sqlalchemy.orm import DeclarativeBase
-from collab.config import settings
+from db.config import settings
 
 engine = create_async_engine(
     url=settings.POSTGRES_URL,
