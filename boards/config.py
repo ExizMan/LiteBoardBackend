@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 from pydantic import Field
+
 from typing import List
 
 class Settings(BaseSettings):
@@ -8,7 +9,7 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = Field(default="postgres")
     POSTGRES_PASSWORD: str = Field(default="postgres")
     POSTGRES_PORT: str = Field(default="5432")
-    CORS_ORIGINS: List[str] = Field(default_factory=lambda: ["http://localhost:5173"])
+    CORS_ORIGINS: List[str] = Field(default_factory=lambda: ["http://89.104.68.136:5173"])
 
     @property
     def POSTGRES_URL(self):
