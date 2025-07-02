@@ -20,6 +20,8 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
 #    command: [ nginx-debug, '-g', 'daemon off;' ]
+    profiles:
+      - 'all'
   redis-commander:
     image: rediscommander/redis-commander:latest
     ports:
@@ -45,6 +47,8 @@ services:
       <<: *env-vars
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    profiles:
+      - 'all'
   redis:
     image: redis:7-alpine
     container_name: redis
@@ -53,6 +57,8 @@ services:
     volumes:
       - redis_data:/data
     restart: unless-stopped
+    profiles:
+      - 'all'
 
 
 
@@ -87,6 +93,8 @@ services:
           target: /app/db
         - action: rebuild
           path: ./auth/requirements.txt
+    profiles:
+      - 'all'
 
   boards:
     depends_on:
@@ -115,7 +123,8 @@ services:
           target: /app/db
         - action: rebuild
           path: ./boards/requirements.txt
-
+    profiles:
+      - 'all'
   collab:
     depends_on:
       - db
@@ -144,7 +153,8 @@ services:
           target: /app/db
         - action: rebuild
           path: ./collab/requirements.txt
-
+    profiles:
+      - 'all'
   canvas:
     build:
       context: .
@@ -156,7 +166,8 @@ services:
         - action: sync
           path: ./canvas
           target: /app
-
+    profiles:
+      - 'all'
 
   migrations:
     depends_on:
