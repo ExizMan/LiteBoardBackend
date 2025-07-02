@@ -176,6 +176,7 @@ services:
     build:
       context: .
       dockerfile: docker_iternal/mlrecogniser.Dockerfile
+      network: host
     ports:
       - 50051:50051
     profiles:
