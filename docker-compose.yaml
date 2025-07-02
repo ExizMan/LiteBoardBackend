@@ -4,7 +4,7 @@ x-postgres-environment-vars: &env-vars
   POSTGRES_HOST: db
   POSTGRES_NAME: postgres
   POSTGRES_PORT: 5432
-  CORS_ORIGINS: '["http://89.104.68.136:5173"]'
+  CORS_ORIGINS: '["http://localhost:5173"]'
 
 
 services:
@@ -171,6 +171,15 @@ services:
           target: /app
     profiles:
       - 'all'
+  
+  mlrecogniser:
+    build:
+      context: .
+      dockerfile: docker_iternal/mlrecogniser.Dockerfile
+    ports:
+      - 50051:50051
+    profiles:
+      - 'all'
 
   migrations:
 #    depends_on:
@@ -181,6 +190,8 @@ services:
       network: host
     environment:
       <<: *env-vars
+    profiles:
+      - 'migrate'
 
 
 

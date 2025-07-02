@@ -5,13 +5,21 @@ import (
 	"log"
 )
 
+type CORSConfig struct {
+	AllowedOrigins   []string `mapstructure:"allowed_origins"`
+	AllowedMethods   []string `mapstructure:"allowed_methods"`
+	AllowedHeaders   []string `mapstructure:"allowed_headers"`
+	AllowCredentials bool     `mapstructure:"allow_credentials"`
+}
+
 type Config struct {
-	Port         string `mapstructure:"port"`
-	JWTSecret    string `mapstructure:"jwt_secret"`
-	RedisAddr    string `mapstructure:"redis_addr"`
-	PostgresDSN  string `mapstructure:"postgres_dsn"`
-	SyncInterval string `mapstructure:"sync_interval"` // например, "1m" или "30s"
-	Env          string `mapstructure:"env"`
+	Port         string     `mapstructure:"port"`
+	JWTSecret    string     `mapstructure:"jwt_secret"`
+	RedisAddr    string     `mapstructure:"redis_addr"`
+	PostgresDSN  string     `mapstructure:"postgres_dsn"`
+	SyncInterval string     `mapstructure:"sync_interval"` // например, "1m" или "30s"
+	Env          string     `mapstructure:"env"`
+	CORS         CORSConfig `mapstructure:"cors"`
 }
 
 var Cfg *Config

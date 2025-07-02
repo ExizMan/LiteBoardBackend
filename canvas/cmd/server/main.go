@@ -12,6 +12,23 @@ import (
 	"time"
 )
 
+// CORS middleware
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		c.Header("Access-Control-Allow-Credentials", "true")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
+}
+
 func main() {
 	config.LoadConfig()
 	log.Println("Starting server...")
@@ -38,6 +55,10 @@ func main() {
 	go hub.StartSyncWorker(db, interval)
 
 	r := gin.Default()
+	
+	// Добавляем CORS middleware
+	r.Use(CORSMiddleware())
+	
 	r.GET("/canvas/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong"})
 	})
@@ -45,6 +66,7 @@ func main() {
 		c.Set("db", db)
 		handlers.HandleWebSocket(c)
 	})
+	r.POST("/canvas/recognise", handlers.RecogniseHandwriting)
 	log.Printf("Server running on port %s", config.Cfg.Port)
 	r.Run(":" + config.Cfg.Port)
 }

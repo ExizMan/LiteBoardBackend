@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package handwriting;
+
+option go_package = "./handwriting;handwritingpb";
+
+service HandwritingRecognizer {
+  rpc Recognize (HandwritingRequest) returns (HandwritingResponse) {}
+}
+
+message HandwritingRequest {
+  repeated DrawEvent events = 1; // Массив событий draw
+}
+
+message DrawEvent {
+  string type = 1; // "draw"
+  string user_id = 2;
+  string board_id = 3;
+  DrawPayload payload = 4;
+  int64 timestamp = 5;
+}
+
+message DrawPayload {
+  repeated Point points = 1;
+  string color = 2;
+  int32 thickness = 3;
+}
+
+message Point {
+  double x = 1;
+  double y = 2;
+}
+
+message HandwritingResponse {
+  repeated DrawEvent events = 1; // Сглаженные события
+} 

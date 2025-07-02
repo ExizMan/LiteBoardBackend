@@ -5,4 +5,11 @@ postgres_dsn: "postgres://postgres:postgres@db:5432"
 sync_interval: "1m"
 env: dev
 
+# CORS настройки
+cors:
+  allowed_origins: ["*"]
+  allowed_methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+  allowed_headers: ["*"]
+  allow_credentials: true
+
 
