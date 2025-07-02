@@ -3,7 +3,7 @@ FROM python:3.12-alpine
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir alembic sqlalchemy[asyncio] asyncpg python-dotenv passlib python-jose
+RUN pip install --no-cache-dir alembic sqlalchemy[asyncio] asyncpg python-dotenv passlib python-jose pydantic_settings
 
 
 COPY ./db ./db

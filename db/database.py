@@ -1,4 +1,3 @@
-
 from sqlalchemy import select, MetaData
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import (
@@ -8,10 +7,10 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 from sqlalchemy.orm import DeclarativeBase
-from db.config import postgres_async_config
+from collab.config import settings
 
 engine = create_async_engine(
-    url=postgres_async_config.POSTGRES_URL,
+    url=settings.POSTGRES_URL,
     echo=True
 )
 
