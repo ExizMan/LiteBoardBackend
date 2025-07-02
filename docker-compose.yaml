@@ -175,6 +175,7 @@ services:
     build:
       context: .
       dockerfile: docker_iternal/migrations.Dockerfile
+      network: host
     environment:
       <<: *env-vars
 
