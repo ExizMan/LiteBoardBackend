@@ -53,13 +53,19 @@ services:
     volumes:
       - redis_data:/data
     restart: unless-stopped
+
+
+
+
+
+
   auth:
     depends_on:
       - db
     build:
       context: .
       dockerfile: docker_iternal/dev.Dockerfile
-      network: host
+#      network: host
       args:
         REQ_PATH: ./auth/requirements.txt
     ports:
@@ -88,7 +94,7 @@ services:
     build:
       context: .
       dockerfile: docker_iternal/dev.Dockerfile
-      network: host
+#      network: host
       args:
         REQ_PATH: ./boards/requirements.txt
     ports:
@@ -116,7 +122,7 @@ services:
     build:
       context: .
       dockerfile: docker_iternal/dev.Dockerfile
-      network: host
+#      network: host
       args:
         REQ_PATH: ./collab/requirements.txt
     ports:
