@@ -173,8 +173,8 @@ services:
       - 'all'
 
   migrations:
-    depends_on:
-      - db
+#    depends_on:
+#      - db
     build:
       context: .
       dockerfile: docker_iternal/migrations.Dockerfile
