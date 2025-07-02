@@ -159,6 +159,9 @@ services:
     build:
       context: .
       dockerfile: docker_iternal/canvas.Dockerfile
+    depends_on:
+      - db
+      - redis
     ports:
       - 8004:8004
     develop:
