@@ -43,3 +43,4 @@ websockets==14.1
 asyncpg
 
 python-jose
+pydantic-settings
