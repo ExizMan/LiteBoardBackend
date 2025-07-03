@@ -4,7 +4,7 @@ x-postgres-environment-vars: &env-vars
   POSTGRES_HOST: db
   POSTGRES_NAME: postgres
   POSTGRES_PORT: 5432
-  CORS_ORIGINS: '["http://89.104.68.136:5173"]'
+  CORS_ORIGINS: '["http://89.104.68.136"]'
 
 
 services:
