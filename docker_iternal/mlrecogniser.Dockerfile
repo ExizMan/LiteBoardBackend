@@ -6,9 +6,8 @@ COPY mlrecogniser/requirements.txt ./
 COPY mlrecogniser/ .
 RUN pip install --no-cache-dir -r requirements.txt
 
-
+ENV PYTHONUNBUFFERED=1
 COPY canvas/handwriting.proto ./
-
 RUN python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. handwriting.proto
 
 CMD ["python", "handwriting_service.py"] 
